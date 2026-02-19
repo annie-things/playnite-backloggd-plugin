@@ -3,7 +3,6 @@ using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Playnite.SDK.Models;
 
 namespace BackloggdCommunityScore
@@ -13,7 +12,6 @@ namespace BackloggdCommunityScore
         private static readonly ILogger logger = LogManager.GetLogger();
         private readonly MetadataRequestOptions options;
         private readonly BackloggdCommunityScorePlugin plugin;
-        private readonly BackloggdClient backloggdClient;
 
         private bool fetchAttempted;
         private BackloggdAggregateScore cachedScore;
@@ -25,7 +23,6 @@ namespace BackloggdCommunityScore
         {
             this.options = options;
             this.plugin = plugin;
-            backloggdClient = BackloggdClient.Shared;
         }
 
         public override int? GetCommunityScore(GetMetadataFieldArgs args)
@@ -56,14 +53,25 @@ namespace BackloggdCommunityScore
             };
         }
 
-        public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
+        public override string GetDescription(GetMetadataFieldArgs args)
         {
-            return GetRatingsMetadataProperties();
-        }
+            if (!plugin.Settings.WriteRatingCountToDescription)
+            {
+                return null;
+            }
 
-        public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
-        {
-            return GetRatingsMetadataProperties();
+            if (!TryGetBackloggdData(out var score, out _))
+            {
+                return null;
+            }
+
+            var ratingLine = BackloggdRatingCountFormatter.BuildRatingCountLine(score.RatingCount);
+            if (string.IsNullOrWhiteSpace(ratingLine))
+            {
+                return null;
+            }
+
+            return BackloggdRatingCountFormatter.UpsertLineAtTop(options?.GameData?.Description, ratingLine);
         }
 
         private bool TryGetBackloggdData(out BackloggdAggregateScore score, out string backloggdGameUrl)
@@ -81,17 +89,7 @@ namespace BackloggdCommunityScore
             fetchAttempted = true;
 
             var game = options?.GameData;
-            backloggdGameUrl = BackloggdUrlResolver.Resolve(game);
-
-            if (string.IsNullOrWhiteSpace(backloggdGameUrl))
-            {
-                logger.Info($"Skipping '{game?.Name}': could not resolve a Backloggd game URL from links or game name.");
-                return false;
-            }
-
-            logger.Info($"Resolved Backloggd URL for '{game?.Name}': {backloggdGameUrl}");
-
-            if (!backloggdClient.TryGetAggregateScore(backloggdGameUrl, out score, out var error))
+            if (!BackloggdScoreLookup.TryGetAggregateScore(game, out score, out backloggdGameUrl, out var error))
             {
                 logger.Warn($"Failed to import Backloggd score for '{game?.Name}' from '{backloggdGameUrl}': {error}");
                 return false;
@@ -127,23 +125,6 @@ namespace BackloggdCommunityScore
             }
 
             return $"Backloggd ({ratingCount.Value.ToString("N0", CultureInfo.InvariantCulture)} ratings)";
-        }
-
-        private IEnumerable<MetadataProperty> GetRatingsMetadataProperties()
-        {
-            if (!TryGetBackloggdData(out var score, out _))
-            {
-                return null;
-            }
-
-            if (!score.RatingCount.HasValue)
-            {
-                return null;
-            }
-
-            var count = score.RatingCount.Value.ToString("N0", CultureInfo.InvariantCulture);
-            var name = $"Backloggd Ratings: {count}";
-            return new[] { new MetadataNameProperty(name) }.ToList();
         }
     }
 }

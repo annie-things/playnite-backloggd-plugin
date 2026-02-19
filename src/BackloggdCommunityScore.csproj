@@ -41,7 +41,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
     <Reference Include="Playnite.SDK">
       <HintPath>$(PLAYNITE_SDK_PATH)\Playnite.SDK.dll</HintPath>
       <Private>False</Private>
@@ -53,7 +56,11 @@
     <Compile Include="BackloggdClient.cs" />
     <Compile Include="BackloggdCommunityScorePlugin.cs" />
     <Compile Include="BackloggdCommunityScoreProvider.cs" />
+    <Compile Include="BackloggdCommunityScoreSettings.cs" />
+    <Compile Include="BackloggdCommunityScoreSettingsView.cs" />
     <Compile Include="BackloggdHtmlParser.cs" />
+    <Compile Include="BackloggdRatingCountFormatter.cs" />
+    <Compile Include="BackloggdScoreLookup.cs" />
     <Compile Include="BackloggdUrlResolver.cs" />
     <Compile Include="IgdbMetadataMatchClient.cs" />
   </ItemGroup>
