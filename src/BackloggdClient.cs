@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Annie <annieannie@anche.no>
+
 using Playnite.SDK;
 using System;
 using System.Collections.Concurrent;
@@ -58,7 +61,6 @@ namespace BackloggdCommunityScore
                 throttleLock.Wait();
                 lockTaken = true;
 
-                // Double-check after acquiring the lock to avoid duplicate requests.
                 if (scoreCache.TryGetValue(backloggdGameUrl, out score))
                 {
                     return true;

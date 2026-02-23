@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Annie <annieannie@anche.no>
+// Trans rights are human rights
+
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System.Collections.Generic;
