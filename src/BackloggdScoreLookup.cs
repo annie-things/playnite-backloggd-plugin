@@ -32,7 +32,7 @@ namespace BackloggdCommunityScore
                 out var primaryTitleYear,
                 out var primaryError);
 
-            if (!TryBuildCanonicalCandidateUrl(backloggdGameUrl, out var canonicalUrl) || game == null || !game.ReleaseYear.HasValue)
+            if (!TryBuildCanonicalCandidateUrl(backloggdGameUrl, out var canonicalUrl))
             {
                 score = primaryScore;
                 error = primaryError;
@@ -66,25 +66,8 @@ namespace BackloggdCommunityScore
                 return true;
             }
 
-            var targetYear = game.ReleaseYear.Value;
-            var primaryMatchesYear = primaryTitleYear.HasValue && primaryTitleYear.Value == targetYear;
-            var canonicalMatchesYear = canonicalTitleYear.HasValue && canonicalTitleYear.Value == targetYear;
-
-            if (canonicalMatchesYear && !primaryMatchesYear)
-            {
-                score = canonicalScore;
-                backloggdGameUrl = canonicalUrl;
-                return true;
-            }
-
-            if (primaryMatchesYear && !canonicalMatchesYear)
-            {
-                score = primaryScore;
-                return true;
-            }
-
-            // If year doesn't disambiguate (or both match), prefer the entry with more votes.
-            // Ports and duplicate variant pages usually have lower rating counts than the main entry.
+            // Prefer the entry with more votes first.
+            // This keeps behavior stable even when library metadata points to the wrong port year.
             var primaryCount = primaryScore?.RatingCount;
             var canonicalCount = canonicalScore?.RatingCount;
             if (primaryCount.HasValue && canonicalCount.HasValue && canonicalCount.Value != primaryCount.Value)
@@ -100,7 +83,43 @@ namespace BackloggdCommunityScore
                 return true;
             }
 
-            score = primaryScore;
+            if (canonicalCount.HasValue && !primaryCount.HasValue)
+            {
+                score = canonicalScore;
+                backloggdGameUrl = canonicalUrl;
+                return true;
+            }
+
+            if (primaryCount.HasValue && !canonicalCount.HasValue)
+            {
+                score = primaryScore;
+                return true;
+            }
+
+            var hasTargetYear = game?.ReleaseYear.HasValue == true;
+            if (hasTargetYear)
+            {
+                var targetYear = game.ReleaseYear.Value;
+                var primaryMatchesYear = primaryTitleYear.HasValue && primaryTitleYear.Value == targetYear;
+                var canonicalMatchesYear = canonicalTitleYear.HasValue && canonicalTitleYear.Value == targetYear;
+
+                if (canonicalMatchesYear && !primaryMatchesYear)
+                {
+                    score = canonicalScore;
+                    backloggdGameUrl = canonicalUrl;
+                    return true;
+                }
+
+                if (primaryMatchesYear && !canonicalMatchesYear)
+                {
+                    score = primaryScore;
+                    return true;
+                }
+            }
+
+            // Last fallback for ambiguous duplicate pages: prefer canonical slug over --N.
+            score = canonicalScore;
+            backloggdGameUrl = canonicalUrl;
             return true;
         }
 

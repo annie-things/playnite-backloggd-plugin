@@ -1,5 +1,12 @@
 AddonId: 05106d44-f505-4fd9-9e57-cc8cc737f3a9
 Packages:
+  - Version: 0.2.1
+    RequiredApiVersion: 6.5.0
+    ReleaseDate: 2026-03-18
+    PackageUrl: https://github.com/annie-things/playnite-backloggd-plugin/releases/download/v0.2.1/05106d44-f505-4fd9-9e57-cc8cc737f3a9_0_2_1.pext
+    Changelog:
+      - Fixed Backloggd duplicate variant resolution when game metadata points to a wrong port year.
+      - Prefer canonical/main slug by rating count before release-year tie-breaks.
   - Version: 0.2.0
     RequiredApiVersion: 6.5.0
     ReleaseDate: 2026-03-18
