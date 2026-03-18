@@ -17,6 +17,7 @@ namespace BackloggdCommunityScore
 
         private readonly HttpClient httpClient;
         private readonly ConcurrentDictionary<string, BackloggdAggregateScore> scoreCache;
+        private readonly ConcurrentDictionary<string, int?> titleYearCache;
         private readonly SemaphoreSlim throttleLock;
 
         public static BackloggdClient Shared { get; } = new BackloggdClient();
@@ -35,12 +36,19 @@ namespace BackloggdCommunityScore
 
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Playnite-BackloggdCommunityScore/0.1");
             scoreCache = new ConcurrentDictionary<string, BackloggdAggregateScore>(StringComparer.OrdinalIgnoreCase);
+            titleYearCache = new ConcurrentDictionary<string, int?>(StringComparer.OrdinalIgnoreCase);
             throttleLock = new SemaphoreSlim(1, 1);
         }
 
         public bool TryGetAggregateScore(string backloggdGameUrl, out BackloggdAggregateScore score, out string error)
         {
+            return TryGetAggregateScoreWithTitleYear(backloggdGameUrl, out score, out _, out error);
+        }
+
+        public bool TryGetAggregateScoreWithTitleYear(string backloggdGameUrl, out BackloggdAggregateScore score, out int? titleYear, out string error)
+        {
             score = null;
+            titleYear = null;
             error = null;
 
             if (string.IsNullOrWhiteSpace(backloggdGameUrl))
@@ -51,6 +59,7 @@ namespace BackloggdCommunityScore
 
             if (scoreCache.TryGetValue(backloggdGameUrl, out score))
             {
+                titleYearCache.TryGetValue(backloggdGameUrl, out titleYear);
                 return true;
             }
 
@@ -63,6 +72,7 @@ namespace BackloggdCommunityScore
 
                 if (scoreCache.TryGetValue(backloggdGameUrl, out score))
                 {
+                    titleYearCache.TryGetValue(backloggdGameUrl, out titleYear);
                     return true;
                 }
 
@@ -73,7 +83,10 @@ namespace BackloggdCommunityScore
                     return false;
                 }
 
+                BackloggdHtmlParser.TryParseTitleYear(html, out titleYear);
+
                 scoreCache[backloggdGameUrl] = score;
+                titleYearCache[backloggdGameUrl] = titleYear;
                 return true;
             }
             catch (Exception ex)
@@ -81,6 +94,7 @@ namespace BackloggdCommunityScore
                 logger.Warn(ex, $"Backloggd request failed for '{backloggdGameUrl}'.");
                 error = ex.Message;
                 score = null;
+                titleYear = null;
                 return false;
             }
             finally

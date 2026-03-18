@@ -123,7 +123,10 @@ namespace BackloggdCommunityScore
 
                             if (Settings.WriteRatingCountToDescription)
                             {
-                                var updatedDescription = BackloggdRatingCountFormatter.UpsertLineAtTop(game.Description, ratingLine);
+                                var updatedDescription = BackloggdRatingCountFormatter.UpsertLineAtTop(
+                                    game.Description,
+                                    ratingLine,
+                                    preferHtmlBreaks: true);
                                 if (!string.Equals(game.Description, updatedDescription, StringComparison.Ordinal))
                                 {
                                     game.Description = updatedDescription;
@@ -133,7 +136,9 @@ namespace BackloggdCommunityScore
 
                             if (Settings.WriteRatingCountToNotes)
                             {
-                                var updatedNotes = BackloggdRatingCountFormatter.UpsertLineAtTop(game.Notes, ratingLine);
+                                var updatedNotes = BackloggdRatingCountFormatter.UpsertLineAtTop(
+                                    game.Notes,
+                                    ratingLine);
                                 if (!string.Equals(game.Notes, updatedNotes, StringComparison.Ordinal))
                                 {
                                     game.Notes = updatedNotes;

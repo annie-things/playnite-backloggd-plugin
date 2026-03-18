@@ -75,7 +75,10 @@ namespace BackloggdCommunityScore
                 return null;
             }
 
-            return BackloggdRatingCountFormatter.UpsertLineAtTop(options?.GameData?.Description, ratingLine);
+            return BackloggdRatingCountFormatter.UpsertLineAtTop(
+                options?.GameData?.Description,
+                ratingLine,
+                preferHtmlBreaks: true);
         }
 
         private bool TryGetBackloggdData(out BackloggdAggregateScore score, out string backloggdGameUrl)

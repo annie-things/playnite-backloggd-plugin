@@ -31,6 +31,10 @@ namespace BackloggdCommunityScore
             "id\\s*=\\s*\"game-rating\".*?<h1[^>]*>(?<value>[0-9]+(?:\\.[0-9]+)?)</h1>",
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
+        private static readonly Regex titleYearRegex = new Regex(
+            "<title>.*?\\((?<year>19\\d{2}|20\\d{2})\\)\\s*</title>",
+            RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+
         public static bool TryParseAggregateScore(string html, out BackloggdAggregateScore score, out string error)
         {
             score = null;
@@ -131,6 +135,30 @@ namespace BackloggdCommunityScore
                 NumberStyles.AllowDecimalPoint,
                 CultureInfo.InvariantCulture,
                 out ratingValue);
+        }
+
+        public static bool TryParseTitleYear(string html, out int? titleYear)
+        {
+            titleYear = null;
+
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return false;
+            }
+
+            var match = titleYearRegex.Match(html);
+            if (!match.Success)
+            {
+                return false;
+            }
+
+            if (!int.TryParse(match.Groups["year"].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedYear))
+            {
+                return false;
+            }
+
+            titleYear = parsedYear;
+            return true;
         }
     }
 }

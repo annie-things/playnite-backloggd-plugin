@@ -28,7 +28,7 @@ namespace BackloggdCommunityScore
             return $"{Prefix}{ratingCount.Value.ToString("N0", CultureInfo.InvariantCulture)}";
         }
 
-        public static string UpsertLineAtTop(string existingText, string backloggdLine)
+        public static string UpsertLineAtTop(string existingText, string backloggdLine, bool preferHtmlBreaks = false)
         {
             if (string.IsNullOrWhiteSpace(backloggdLine))
             {
@@ -42,7 +42,9 @@ namespace BackloggdCommunityScore
                 return backloggdLine + Environment.NewLine;
             }
 
-            var separator = LooksLikeHtml(text) ? "<br/><br/>" : Environment.NewLine + Environment.NewLine;
+            var separator = preferHtmlBreaks || LooksLikeHtml(text)
+                ? "<br/><br/>"
+                : Environment.NewLine + Environment.NewLine;
             return backloggdLine + separator + text;
         }
 
