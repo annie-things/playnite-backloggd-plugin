@@ -1,5 +1,12 @@
 AddonId: 05106d44-f505-4fd9-9e57-cc8cc737f3a9
 Packages:
+  - Version: 0.2.2
+    RequiredApiVersion: 6.5.0
+    ReleaseDate: 2026-04-18
+    PackageUrl: https://github.com/annie-things/playnite-backloggd-plugin/releases/download/v0.2.2/05106d44-f505-4fd9-9e57-cc8cc737f3a9_0_2_2.pext
+    Changelog:
+      - Fixed Backloggd fetches after Bunny Shield started challenging the plugin's old request profile.
+      - Switched Backloggd requests to a browser-like request signature and added clearer failure diagnostics.
   - Version: 0.2.1
     RequiredApiVersion: 6.5.0
     ReleaseDate: 2026-03-18
